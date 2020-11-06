@@ -1,0 +1,3 @@
+<launch>
+<node pkg="track" type="track" name="track" output="screen" required="true" />
+</launch>

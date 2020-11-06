@@ -1,0 +1,8 @@
+prefix=/home/d402/track_ws/devel
+
+Name: print_the_track
+Description: Description of print_the_track
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

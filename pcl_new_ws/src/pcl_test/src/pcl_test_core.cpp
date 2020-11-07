@@ -4,9 +4,9 @@
 PclTestCore::PclTestCore(ros::NodeHandle &nh){
 	
 	//使用类的方法作为回调函数，
-    sub_point_cloud_ = nh.subscribe("/pandar",100, &PclTestCore::point_cb, this);
+    sub_point_cloud_ = nh.subscribe("/pandar",1, &PclTestCore::point_cb, this);
 	sub_the_gps = nh.subscribe("unionstrong/gpfpd",1000,&PclTestCore::get_the_gps,this);
-    pub_filtered_vis_ = nh.advertise<sensor_msgs::PointCloud2>("/filtered_vis", 10);
+    pub_filtered_vis_ = nh.advertise<sensor_msgs::PointCloud2>("/filtered_vis", 1);
 	pub_filtered_points_ = nh.advertise<std_msgs::Float64MultiArray>("/filtered_points", 1);
 	pub_print_point = nh.advertise<sensor_msgs::PointCloud2>("/print_point", 10);
 

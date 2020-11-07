@@ -31,10 +31,10 @@ def gps_to_mkt1(longitude,latitude):
 
 def round_goal(point):
 	global boat,goal_num,des
-	p1 = [point[0] - 10,point[1] - 10,0]
-	p2 = [point[0] + 10,point[1] - 10,0]
-	p3 = [point[0] - 10,point[1] + 10,0]
-	p4 = [point[0] + 10,point[1] + 10,0]
+	p1 = [point[0] - 6,point[1] - 6,0]
+	p2 = [point[0] + 6,point[1] - 6,0]
+	p3 = [point[0] - 6,point[1] + 6,0]
+	p4 = [point[0] + 6,point[1] + 6,0]
 	des.insert(goal_num,p1)
 	des.insert(goal_num,p2)
 	des.insert(goal_num,p3)
@@ -42,19 +42,31 @@ def round_goal(point):
 
 def left_goal(point):
 	global boat,goal_num,des
-	signal = (point[0] - boat[0])*(point[1] - boat[1])
-	if signal > 0:
-		des.insert(goal_num,[boat[0],point[1],0]) 
+	if point[0] == boat[0]:
+		des.insert(goal_num,[point[0],point[1]+5,0])
 	else:
-		des.insert(goal_num,[point[0],boat[1],0])
+		theta = math.atan((point[1]-boat[1])/(point[0]-boat[0]))
+		phi = math.sqrt((point[1]-boat[1])**2 + (point[0]-boat[0])**2)
+		if point[0]-boat[0] < 0:
+			theta -= math.pi
+		theta += 40/180*math.pi
+		x = boat[0] + phi*math.cos(theta)
+		y = boat[1] + phi*math.sin(theta)
+		des.insert(goal_num,[x,y,0])
 
 def right_goal(point):
 	global boat,goal_num,des
-	signal = (point[0] - boat[0])*(point[1] - boat[1])
-	if signal < 0:
-		des.insert([boat[0],point[1],0])
+	if point[0] == boat[0]:
+		des.insert(goal_num,[point[0],point[1]+5,0])
 	else:
-		des.insert([point[0],boat[1],0])
+		theta = math.atan((point[1]-boat[1])/(point[0]-boat[0]))
+		phi = math.sqrt((point[1]-boat[1])**2 + (point[0]-boat[0])**2)
+		if point[0]-boat[0] < 0:
+			theta -= math.pi
+		theta -= 40/180*math.pi
+		x = boat[0] + phi*math.cos(theta)
+		y = boat[1] + phi*math.sin(theta)
+		des.insert(goal_num,[x,y,0])
 
 # 障碍物铝箔，false表示需要滤掉
 def obs_filter(point):
@@ -62,6 +74,8 @@ def obs_filter(point):
 	for i in range(len(obs[0])):
 		dist = (point[0] - obs[0][i])**2 + (point[1] - obs[1][i])**2
 		if dist < 16:
+			obs[0][i] = (point[0] + obs[0][i])/2
+			obs[1][i] = (point[1] + obs[1][i])/2
 			return False
 	return True
 
@@ -106,15 +120,13 @@ class mpc_stanly_com(object):
 		if msg.r == 1 or msg.g == 1:
 			deci = True 
 		else:
-			deci = True 
-
-
+			deci = False	
 
 
 
 	def get_obs(self, msg):
 		print("strat recv obs\n")
-		global obs
+		global obs,deci
 		# obs[0]=[]
 		# obs[1]=[]
 		local_pos = msg.data
@@ -128,18 +140,18 @@ class mpc_stanly_com(object):
 				obs[0].append(gox)
 				obs[1].append(goy)			
 				print("obs pos:",localx,localy,gox,goy)
-				if len(obs[0])==1000 :
+				if deci :
 					round_goal([gox,goy])
 				else:
-					left_goal([gox,goy])
+					right_goal([gox,goy])
 
 	def get_gps(self, msg):
-		print("strat recv gps\n")
+		#print("strat recv gps\n")
 		global boat,had_arrive_the_dis, destination, target_pointx, target_pointy, des, target_num, goal_num, if_arrived_current
 		heading = msg.position_covariance[1]
 		# if boat[3] == msg.position_covariance[0]:
 		# 	print('收到相同的时间戳\n')
-		print(type(msg.longitude),msg.latitude)
+		#print(type(msg.longitude),msg.latitude)
 		boat[0],boat[1] = self.gps_to_mkt(msg.longitude,msg.latitude)
 		boat[2] = heading/180*math.pi #弧度制
 		boat[3] = msg.position_covariance[0] #对应的时间戳
@@ -147,8 +159,8 @@ class mpc_stanly_com(object):
 		data_to_log[1] = boat[1]
 		data_to_log[2] = boat[2]
 		data_to_log[3] = boat[3]
-		print ("gps pos:",boat[0],boat[1],boat[2],boat[3])
-		print ("receive the msg\n")
+		#print ("gps pos:",boat[0],boat[1],boat[2],boat[3])
+		#print ("receive the msg\n")
 
 		# 坐标系角度变换
 		if boat[2] < -np.pi/2 and boat[2] > -np.pi:
@@ -158,16 +170,19 @@ class mpc_stanly_com(object):
 
 		if not had_arrive_the_dis:
 			if self.flag%4 == 0:
-				temp_target_pointx,temp_target_pointy = planning([boat[0], boat[1], tempan], des[goal_num], 12)
+				temp_target_pointx,temp_target_pointy = planning([boat[0], boat[1], tempan], des[goal_num], 20)
 				if self.if_change_ref(temp_target_pointx,temp_target_pointy,target_pointx,target_pointy) :
 					target_pointx = temp_target_pointx
 					target_pointy = temp_target_pointy
-			if self.get_dis([boat[0], boat[1]], des[goal_num][:2]) < 5:
+			if self.get_dis([boat[0], boat[1]], des[goal_num][:2]) < 3:
 				goal_num += 1
-				target_pointx, target_pointy = planning([boat[0], boat[1], tempan], des[goal_num], 12)
+				target_pointx, target_pointy = planning([boat[0], boat[1], tempan], des[goal_num], 20)
 			if self.get_dis([boat[0], boat[1]], destination) < 5:
 				had_arrive_the_dis = True
-
+			print('================================================')
+			print('obs:  ',obs)
+			print('des: ',des,'  goal_num:  ',goal_num)
+			print('================================================')
 			self.flag +=1
 			self.point_pre_process()
 			self.find_nearest_point()
@@ -209,7 +224,7 @@ class mpc_stanly_com(object):
 			points_angle.append(
 				self.get_angle([target_pointx[i], target_pointy[i]], [target_pointx[i + 2], target_pointy[i + 2]]))
 			i = i + 1
-		print(points_angle)
+		#print(points_angle)
 
 
 	def get_dis(self,point_pre, point_post):
@@ -226,7 +241,7 @@ class mpc_stanly_com(object):
 				temp_dis = dis
 				target_num = i + 3
 			i = i + 1
-		print("Nearset point is", target_num, temp_dis)
+		#print("Nearset point is", target_num, temp_dis)
 		data_to_log[5] = target_num
 		return
 
@@ -234,13 +249,13 @@ class mpc_stanly_com(object):
 	def find_deci_angle(self):
 		global boat, target_num, points_angle, ki, decide_angle, data_to_log,max_miss
 		delta1 = self.get_angle_dis(points_angle[target_num], boat[2])
-		print("detal1 is ", delta1)
+		#print("detal1 is ", delta1)
 		dis_u2p = self.get_dis([boat[0], boat[1]], [target_pointx[target_num], target_pointy[target_num]])
-		print("dis_u2p is ", dis_u2p)
+		#print("dis_u2p is ", dis_u2p)
 		degree_usv = self.get_angle([boat[0], boat[1]], [target_pointx[target_num], target_pointy[target_num]])
-		print("degree_usv is ", degree_usv)
+		#print("degree_usv is ", degree_usv)
 		judge_degree = -self.get_angle_dis(points_angle[target_num], degree_usv)
-		print("judge_degree is ", judge_degree)
+		#print("judge_degree is ", judge_degree)
 		if judge_degree < -math.pi / 2:
 			temp_judge_degree = -judge_degree - math.pi
 		elif judge_degree > math.pi / 2:
@@ -248,12 +263,12 @@ class mpc_stanly_com(object):
 		else:
 			temp_judge_degree = -judge_degree
 		e_dis = dis_u2p * math.sin(temp_judge_degree)
-		print("e_dis is ", e_dis)
+		#print("e_dis is ", e_dis)
 		if math.fabs(e_dis) > max_miss:
 			max_miss = math.fabs(e_dis)
 		# et = ki * e_dis / (math.sqrt(math.pow(boat[2], 2) + math.pow(boat[3], 2)) + 0.1)
 		et = ki * e_dis / 3
-		print("et is ", et)
+		#print("et is ", et)
 		decide_angle = et + delta1
 		data_to_log[6] = ki
 		data_to_log[7] = delta1
@@ -262,7 +277,7 @@ class mpc_stanly_com(object):
 		data_to_log[8] = et
 		data_to_log[12] = e_dis
 		data_to_log[13] = max_miss
-		print("decide_angle is ", decide_angle)
+		#print("decide_angle is ", decide_angle)
 		return
 
 
@@ -284,7 +299,7 @@ class mpc_stanly_com(object):
 		# 	current_cmd.y = self.w_last - 0.3
 		# else:
 		# 	current_cmd.y = current_cmd.y
-		print("w is ", w)
+		#print("w is ", w)
 		self.w_last = current_cmd.y
 		self.pub_control.publish(current_cmd)
 		
@@ -308,7 +323,8 @@ def plot_ponit():
 		plt.ylabel(boat[1])
 		plt.title(goal_num)
 		#plt.plot([x1,x2],[y1,y2],'go')
-		plt.plot(des[0:][0],des[0:][1],'go')
+		for i in range(len(des)):
+			plt.plot(des[i][0],des[i][1],'go')
 		plt.plot(obs[0],obs[1], "ro")
 		# plt.plot([20, 20, 150, 280, 280], [20, 280, 150, 280, 20], color='g')
 		# plt.plot([20, 20], [70,130], "bo")
@@ -421,8 +437,8 @@ def planning(x_c,x_s,N_pre):
 
 		## 尽可能满足运动学约束的cost
 		dynamic_error = (X[0,i+1] - x_next_[0])**2 + (X[0,i+1] - x_next_[0])**2 + (X[1,i+1] - x_next_[1])**2
-		obj = obj + state_error + control_error + 30 * horizon_error + 100000*dynamic_error
-		#g.append(X[:, i + 1] - x_next_)100
+		obj = obj + state_error + control_error + 30 * horizon_error + 10000*dynamic_error
+		#g.append(X[:, i + 1] - x_next_)
 
 	#### obsatcle constraints
 	for i in range(N + 1):
@@ -432,7 +448,7 @@ def planning(x_c,x_s,N_pre):
 	opt_variables = ca.vertcat(ca.reshape(U, -1, 1), ca.reshape(X, -1, 1))
 
 	nlp_prob = {'f': obj, 'x': opt_variables, 'p': P, 'g': ca.vertcat(*g)}
-	opts_setting = {'ipopt.max_iter': 500, 'ipopt.print_level': 0, 'print_time': 0, 'ipopt.acceptable_tol': 1e-8,
+	opts_setting = {'ipopt.max_iter': 300, 'ipopt.print_level': 0, 'print_time': 0, 'ipopt.acceptable_tol': 1e-8,
 					'ipopt.acceptable_obj_change_tol': 1e-6}
 
 	solver = ca.nlpsol('solver', 'ipopt', nlp_prob, opts_setting)
@@ -500,7 +516,7 @@ if __name__ == '__main__':
 	x2,y2 = gps_to_mkt1(113.61178468+2*(113.61180969-113.61178468),22.37368653+2 * (22.37390888 - 22.37368653))
 	x3,y3 = gps_to_mkt1(113.61278028,22.37548521)
 	x4,y4 = gps_to_mkt1(113.61221177,22.37496951)
-	des = [[x2,y2,0],[x1,y1,0]]
+	des = [[x2+10,y2,0],[x1,y1,0]]
 	target_pointx = []  # 自己随便设置的一些目标点
 	target_pointy = []
 	ki = 0.2
@@ -508,11 +524,11 @@ if __name__ == '__main__':
 	file_path = r'data_log.csv'  #设置log文件位置
 	data_to_log = ["pointx","pointy","angle","time","goal_num","target_num","ki","heading_dis","et","decide_angle","speed","w","miss","max_miss"] #存储文件的内容
 	obs = [[],[]]
-	# deci = False
+	deci = False
 	max_miss = 0
 	t1 = Thread(target=plot_ponit)
 	t1.start()
-	target_pointx,target_pointy = planning([x1, y1, 0], des[goal_num], 20)
+	target_pointx,target_pointy = planning([x2, y2, 0], des[goal_num], 20)
 	rospy.init_node("Mpc_Stanly_com",anonymous=True)
 	print("thread create\n")
 	mpc_stanly = mpc_stanly_com()
@@ -525,7 +541,7 @@ import rospy
 import paho.mqtt.client as mqtt
 import struct
 import math
-from sensor_msgs.msg import NavSatFix
+from sensor_msgs.msg import NavSatFixprint
 from std_msgs.msg import Float64
 from geometry_msgs.msg import Vector3
 

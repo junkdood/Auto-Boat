@@ -51,10 +51,10 @@ def left_goal(point):
 		des.insert(goal_num,[point[0],point[1]+5,0])
 	else:
 		theta = math.atan((point[1]-boat[1])/(point[0]-boat[0]))
-		phi = 1.2*math.sqrt((point[1]-boat[1])**2 + (point[0]-boat[0])**2)
+		phi = math.sqrt((point[1]-boat[1])**2 + (point[0]-boat[0])**2)
 		if point[0]-boat[0] < 0:
 			theta -= math.pi
-		theta += 40/180*math.pi
+		theta += 30/180*math.pi
 		x = boat[0] + phi*math.cos(theta)
 		y = boat[1] + phi*math.sin(theta)
 		des.insert(goal_num,[x,y,0])
@@ -65,10 +65,10 @@ def right_goal(point):
 		des.insert(goal_num,[point[0],point[1] - 5,0])
 	else:
 		theta = math.atan((point[1]-boat[1])/(point[0]-boat[0]))
-		phi = 1.2*math.sqrt((point[1]-boat[1])**2 + (point[0]-boat[0])**2)
+		phi = math.sqrt((point[1]-boat[1])**2 + (point[0]-boat[0])**2)
 		if point[0]-boat[0] < 0:
 			theta += math.pi
-		theta -= 40/180*math.pi
+		theta -= 30/180*math.pi
 		x = boat[0] + phi*math.cos(theta)
 		y = boat[1] + phi*math.sin(theta)
 		des.insert(goal_num,[x,y,0])
@@ -132,8 +132,6 @@ class mpc_stanly_com(object):
 	def get_obs(self, msg):
 		print("strat recv obs\n")
 		global obs,deci
-		# obs[0]=[]
-		# obs[1]=[]
 		local_pos = msg.data
 		print("num of ob:",len(local_pos),len(local_pos)/2)
 		for i in range(int(len(local_pos)/2)):
@@ -147,9 +145,9 @@ class mpc_stanly_com(object):
 				print("obs pos:",localx,localy,gox,goy)
 				if len(obs[0]) == 3 :
 					left_goal([gox,goy])
-				elif len(obs[0]) == 4:
-					round_goal([gox,goy])
 				elif len(obs[0]) == 5:
+					round_goal([gox,goy])
+				elif len(obs[0]) == 6:
 					right_goal([gox,goy])
 				
 

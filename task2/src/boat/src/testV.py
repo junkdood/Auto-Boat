@@ -94,7 +94,7 @@ class mpc_stanly_com(object):
 
 	def listener(self):
 		rospy.Subscriber("unionstrong/gpfpd",NavSatFix,self.get_gps)
-		#rospy.Subscriber("filtered_points",Float64MultiArray,self.get_obs,queue_size=1)
+		rospy.Subscriber("filtered_points",Float64MultiArray,self.get_obs,queue_size=1)
 		rospy.Subscriber("ballcolor",Color,self.get_deci)
 		print('start to listen the msg and MPCing\n')
 		rospy.spin()
@@ -500,7 +500,8 @@ if __name__ == '__main__':
 	x10,y10 = gps_to_mkt1(113.69925856,22.01990157)
 	destination = [x10+10,y10+10]
 
-	des = [[x1,y1,0],[x2,y2,0],[x3,y3,0],[x4,y4,0],[x5,y5,0],[x6,y6,0],[x7,y7,0],[x8,y8,0],[x9,y9,0],[x10,y10,0]]
+	#des = [[x1,y1,0],[x2,y2,0],[x3,y3,0],[x4,y4,0],[x5,y5,0],[x6,y6,0],[x7,y7,0],[x8,y8,0],[x9,y9,0],[x10,y10,0]]
+	des = [[x1,y1,0],[x10,y10,0]]
 	target_pointx = []  # 自己随便设置的一些目标点
 	target_pointy = []
 	ki = 0.2

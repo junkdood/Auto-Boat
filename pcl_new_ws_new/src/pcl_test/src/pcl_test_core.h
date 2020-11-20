@@ -59,7 +59,6 @@ class PclTestCore
     pcl::PointXYZ translate(float theta, std::vector<float> position, pcl::PointXYZ point);
     void get_the_gps(const sensor_msgs::NavSatFix& msg);
     std::vector<std::vector<float>> point_cluster(const pcl::PointCloud<pcl::PointXYZ>::Ptr in,const    pcl::PointCloud<pcl::PointXYZ>::Ptr out);
-    std::vector<std::vector<float>> point_cluster_new(const pcl::PointCloud<pcl::PointXYZ>::Ptr in,const    pcl::PointCloud<pcl::PointXYZ>::Ptr out);
     pcl::PointXYZ ret_the_gps(pcl::PointXYZ point);
     void Cloud_vis(boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::string name);
     

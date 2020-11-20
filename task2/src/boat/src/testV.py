@@ -54,7 +54,7 @@ def left_goal(point):
 		phi = math.sqrt((point[1]-boat[1])**2 + (point[0]-boat[0])**2)
 		if point[0]-boat[0] < 0:
 			theta -= math.pi
-		theta += 30/180*math.pi
+		theta += 15/180*math.pi
 		x = boat[0] + phi*math.cos(theta)
 		y = boat[1] + phi*math.sin(theta)
 		des.insert(goal_num,[x,y,0])
@@ -68,7 +68,7 @@ def right_goal(point):
 		phi = math.sqrt((point[1]-boat[1])**2 + (point[0]-boat[0])**2)
 		if point[0]-boat[0] < 0:
 			theta += math.pi
-		theta -= 30/180*math.pi
+		theta -= 15/180*math.pi
 		x = boat[0] + phi*math.cos(theta)
 		y = boat[1] + phi*math.sin(theta)
 		des.insert(goal_num,[x,y,0])
@@ -145,9 +145,9 @@ class mpc_stanly_com(object):
 				print("obs pos:",localx,localy,gox,goy)
 				if len(obs[0]) == 3 :
 					left_goal([gox,goy])
-				elif len(obs[0]) == 5:
+				elif len(obs[0]) == 4:
 					round_goal([gox,goy])
-				elif len(obs[0]) == 6:
+				elif len(obs[0]) == 5:
 					right_goal([gox,goy])
 				
 

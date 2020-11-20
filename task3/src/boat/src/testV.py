@@ -17,6 +17,11 @@ import xlwt
 from matplotlib import pyplot as plt
 
 
+pub_speed = 0.6 #马达动力百分比
+obsfi = 25 #两个障碍物距离的平方小于这个数时，被认为是同一个障碍物
+planfi = 10000 #用于过滤掉不合理的规划
+goalsize = 5 #离目标点多远时认为已经到达
+
 def write_data():
 	global file_path, data_to_log
 	with open(file_path, "a+") as log_file:
@@ -49,7 +54,7 @@ def left_goal(point):
 		phi = math.sqrt((point[1]-boat[1])**2 + (point[0]-boat[0])**2)
 		if point[0]-boat[0] < 0:
 			theta -= math.pi
-		theta += 40/180*math.pi
+		theta += 15/180*math.pi
 		x = boat[0] + phi*math.cos(theta)
 		y = boat[1] + phi*math.sin(theta)
 		des.insert(goal_num,[x,y,0])
@@ -57,13 +62,13 @@ def left_goal(point):
 def right_goal(point):
 	global boat,goal_num,des
 	if point[0] == boat[0]:
-		des.insert(goal_num,[point[0],point[1]+5,0])
+		des.insert(goal_num,[point[0],point[1] - 5,0])
 	else:
 		theta = math.atan((point[1]-boat[1])/(point[0]-boat[0]))
 		phi = math.sqrt((point[1]-boat[1])**2 + (point[0]-boat[0])**2)
 		if point[0]-boat[0] < 0:
-			theta -= math.pi
-		theta -= 40/180*math.pi
+			theta += math.pi
+		theta -= 15/180*math.pi
 		x = boat[0] + phi*math.cos(theta)
 		y = boat[1] + phi*math.sin(theta)
 		des.insert(goal_num,[x,y,0])
@@ -73,73 +78,11 @@ def obs_filter(point):
 	global obs,goal_num,des
 	for i in range(len(obs[0])):
 		dist = (point[0] - obs[0][i])**2 + (point[1] - obs[1][i])**2
-		if dist < 16:
+		if dist < obsfi:
 			obs[0][i] = (point[0] + obs[0][i])/2
 			obs[1][i] = (point[1] + obs[1][i])/2
 			return False
 	return True
-
-
-def exploit(x,y):
-	global des,goal_num
-	area_sum1,area_sum2,area_sum3,area_sum4 = 0,0,0,0
-	longitude1 = 113.698873
-	latitude1 = 22.020240
-	longitude2= 113.699962
-	latitude2= 22.019566
-	longitude3= 113.699768
-	latitude3= 22.019265
-	longitude4= 113.698489
-	latitude4= 22.019836
-	a1,a2=gps_to_mkt1(longitude1,latitude1)
-	b1,b2=gps_to_mkt1(longitude2,latitude2)
-	c1,c2=gps_to_mkt1(longitude3,latitude3)
-	d1,d2=gps_to_mkt1(longitude4,latitude4)
-	s1=abs(a1-x)*abs(a2-y)
-	s2=abs(b1-x)*abs(b2-y)
-	s3=abs(c1-x)*abs(c2-y)
-	s4=abs(d1-x)*abs(d2-y)
-	if area_sum1==0 and area_sum2==0 and area_sum3==0 and area_sum4==0:
-		area_min=min(s1,s2,s3,s4)
-	else:
-		area_min=min(area_sum1,area_sum2,area_sum3,area_sum4)
-	alpha=0.4
-	if area_min==area_sum1:
-		area_sum1 +=s1*alpha
-		area_sum2 +=s2
-		area_sum3 +=s3
-		area_sum4 +=s4
-	elif area_min==area_sum2:
-		area_sum1 +=s1
-		area_sum2 +=s2*alpha
-		area_sum3 +=s3
-		area_sum4 +=s4
-	elif area_min==area_sum3:
-		area_sum1 +=s1
-		area_sum2 +=s2
-		area_sum3 +=s3*alpha
-		area_sum4 +=s4
-	elif area_min==area_sum4:
-		area_sum1 +=s1
-		area_sum2 +=s2
-		area_sum3 +=s3
-		area_sum4 +=s4*alpha
-	
-	
-	if goal_num == len(des):
-		area_sum=max(area_sum1,area_sum2,area_sum3,area_sum4)
-		if area_sum==area_sum1:
-			#des.insert(goal_num,[a1,a2,0])
-			print('===============1==================')
-		elif area_sum==area_sum2:
-			#des.insert(goal_num,[b1,b2,0])
-			print('===============2==================')
-		elif area_sum==area_sum3:
-			#des.insert(goal_num,[c1,c2,0])
-			print('===============3==================')
-		elif area_sum==area_sum4:
-			#des.insert(goal_num,[d1,d2,0])
-			print('===============4==================')
 
 class mpc_stanly_com(object):
 	# 初始化和接受信息的部分
@@ -151,7 +94,7 @@ class mpc_stanly_com(object):
 
 	def listener(self):
 		rospy.Subscriber("unionstrong/gpfpd",NavSatFix,self.get_gps)
-		#rospy.Subscriber("filtered_points",Float64MultiArray,self.get_obs,queue_size=1)
+		rospy.Subscriber("filtered_points",Float64MultiArray,self.get_obs,queue_size=1)
 		rospy.Subscriber("ballcolor",Color,self.get_deci)
 		print('start to listen the msg and MPCing\n')
 		rospy.spin()
@@ -165,7 +108,7 @@ class mpc_stanly_com(object):
 
 	def if_change_ref(self,x1,y1,x2,y2):
 		error = 0
-		thr = 10000
+		thr = planfi
 		for i in range(len(x1)):
 			error = error + (x1[i]-x2[i])**2 + (y1[i]-y2[i])**2
 		if error < thr:
@@ -189,8 +132,6 @@ class mpc_stanly_com(object):
 	def get_obs(self, msg):
 		print("strat recv obs\n")
 		global obs,deci
-		# obs[0]=[]
-		# obs[1]=[]
 		local_pos = msg.data
 		print("num of ob:",len(local_pos),len(local_pos)/2)
 		for i in range(int(len(local_pos)/2)):
@@ -202,10 +143,9 @@ class mpc_stanly_com(object):
 				obs[0].append(gox)
 				obs[1].append(goy)			
 				print("obs pos:",localx,localy,gox,goy)
-				if deci :
-					round_goal([gox,goy])
-				else:
-					round_goal([gox,goy])
+				round_goal([gox,goy])
+				
+				
 
 	def get_gps(self, msg):
 		#print("strat recv gps\n")
@@ -230,15 +170,13 @@ class mpc_stanly_com(object):
 		else:
 			tempan = -boat[2] + np.pi/2
 
-		exploit(boat[0], boat[1])
-
 		if not had_arrive_the_dis:
 			if self.flag%4 == 0:
 				temp_target_pointx,temp_target_pointy = planning([boat[0], boat[1], tempan], des[goal_num], 20)
 				if self.if_change_ref(temp_target_pointx,temp_target_pointy,target_pointx,target_pointy) :
 					target_pointx = temp_target_pointx
 					target_pointy = temp_target_pointy
-			if self.get_dis([boat[0], boat[1]], des[goal_num][:2]) < 5:
+			if self.get_dis([boat[0], boat[1]], des[goal_num][:2]) < goalsize:
 				goal_num += 1
 				target_pointx, target_pointy = planning([boat[0], boat[1], tempan], des[goal_num], 20)
 			if self.get_dis([boat[0], boat[1]], destination) < 5:
@@ -348,7 +286,7 @@ class mpc_stanly_com(object):
 	def change_motor(self):
 		global s, decide_angle, had_arrive_the_dis, data_to_log,if_arrived_current
 		current_cmd = Vector3()
-		current_cmd.x = 0.6
+		current_cmd.x = pub_speed
 		if decide_angle >= 0:
 			w = -math.sqrt(decide_angle/math.pi)
 		else:
@@ -374,10 +312,6 @@ def plot_ponit():
 	x=[]
 	y=[]
 	plt.ion()
-	#plt.axis('equal')
-	# plt.grid(axis="y")
-	# plt.plot([20, 20, 150, 280, 280], [20, 280, 150, 280, 20], color='g')
-	# plt.plot([20, 20], [70,130], "bo")
 	while True:
 		plt.clf()
 		plt.axis('equal')
@@ -386,41 +320,15 @@ def plot_ponit():
 		plt.xlabel(boat[0])
 		plt.ylabel(boat[1])
 		plt.title(goal_num)
-		#plt.plot([x1,x2],[y1,y2],'go')
 		for i in range(len(des)):
 			plt.plot(des[i][0],des[i][1],'go')
 		plt.plot(obs[0],obs[1], "ro")
-		# plt.plot([20, 20, 150, 280, 280], [20, 280, 150, 280, 20], color='g')
-		# plt.plot([20, 20], [70,130], "bo")
+
 		plt.plot(boat[0], [boat[1]], '*')
 		plt.plot(target_pointx[target_num], target_pointy[target_num], 'o')
 		plt.plot(target_pointx[target_num + 2], target_pointy[target_num + 2], '^')
 		plt.plot(target_pointx, target_pointy, '.')
 
-
-		# if goal_num == 0:
-		#	 horizon_error = ((des[goal_num + 1][1] - des[goal_num][1]) * boat[0] - (
-		#			 des[goal_num + 1][0] - des[goal_num][0]) * boat[1] + (
-		#							  des[goal_num + 1][0] * des[goal_num][1] - des[goal_num + 1][1] * des[goal_num][
-		#						  0])) / math.sqrt((des[goal_num + 1][0] - des[goal_num][0]) ** 2 + (
-		#			 des[goal_num + 1][1] - des[goal_num][1]) ** 2)
-		# else:
-		#	 horizon_error = ((des[goal_num][1] - des[goal_num - 1][1]) * boat[0] - (
-		#			 des[goal_num][0] - des[goal_num - 1][0]) * boat[1] + (
-		#							  des[goal_num][0] * des[goal_num - 1][1] - des[goal_num][1] * des[goal_num - 1][
-		#						  0]))/ math.sqrt((des[goal_num][0] - des[goal_num - 1][0]) ** 2 + (
-		#			 des[goal_num][1] - des[goal_num - 1][1]) ** 2)
-		# # if horizon_error > 5:
-		# #	 horizon_error = 5
-		# # if horizon_error < -5:
-		# #	 horizon_error = -5
-		# Ex2 = (Ex2 * n + horizon_error*horizon_error)/(n+1)
-		# n = n + 1
-		# # plt.plot(n,math.sqrt(Ex2), 'ro')
-		# # plt.plot(n, horizon_error, 'r.')
-		# # plt.plot(n, math.sqrt((obs[0][0] - boat[0]) * (obs[0][0] - boat[0]) + (obs[1][0] - boat[1]) * (obs[1][0] - boat[1])), 'b.')
-		# # plt.plot(n, math.sqrt((obs[0][1] - boat[0]) * (obs[0][1] - boat[0]) + (obs[1][1] - boat[1]) * (obs[1][1] - boat[1])), 'b.')
-		# # plt.plot(boat[0], boat[1], 'r.')
 		x.append(boat[0])
 		y.append(boat[1])
 		plt.plot(x,y, 'b.')
@@ -562,8 +470,7 @@ def planning(x_c,x_s,N_pre):
 	u0 = estimated_opt[:N * n_controls].reshape(N, n_controls).T  # (n_controls, N)
 	x_m = estimated_opt[N * n_controls:].reshape(N + 1, n_states).T  # [n_states, N]
 	data_to_log[4] = goal_num
-	#data_to_log = [x_m[0], x_m[1]]
-	#write_data()
+
 	return x_m[0],x_m[1]
 
 
@@ -575,12 +482,20 @@ if __name__ == '__main__':
 	if_arrived_current = False
 	decide_angle = 0
 	points_angle = []
-	destination = [0,0]
-	x1,y1 = gps_to_mkt1(113.700017,22.019569)
-	x2,y2 = gps_to_mkt1(113.61178468+2*(113.61180969-113.61178468),22.37368653+2 * (22.37390888 - 22.37368653))
-	x3,y3 = gps_to_mkt1(113.61278028,22.37548521)
-	x4,y4 = gps_to_mkt1(113.61221177,22.37496951)
-	des = [[x1,y1,0]]
+	x1,y1 = gps_to_mkt1(113.70021786,22.01929372)
+	x2,y2 = gps_to_mkt1(113.69985344,22.01937399)
+	x3,y3 = gps_to_mkt1(113.69973397,22.01957511)
+	x4,y4 = gps_to_mkt1(113.69962583,22.01953778)
+	x5,y5 = gps_to_mkt1(113.69965461,22.01968713)
+	x6,y6 = gps_to_mkt1(113.69974144,22.01973531)
+	x7,y7 = gps_to_mkt1(113.69973397,22.01957511)
+	x8,y8 = gps_to_mkt1(113.69962583,22.01953778)
+	x9,y9 = gps_to_mkt1(113.69960607,22.01992731)
+	x10,y10 = gps_to_mkt1(113.69925856,22.01990157)
+	destination = [x10+10,y10+10]
+
+	#des = [[x1,y1,0],[x2,y2,0],[x3,y3,0],[x4,y4,0],[x5,y5,0],[x6,y6,0],[x7,y7,0],[x8,y8,0],[x9,y9,0],[x10,y10,0]]
+	des = [[x1,y1,0],[x10,y10,0]]
 	target_pointx = []  # 自己随便设置的一些目标点
 	target_pointy = []
 	ki = 0.2
@@ -598,63 +513,3 @@ if __name__ == '__main__':
 	mpc_stanly = mpc_stanly_com()
 	mpc_stanly.listener()
 	t1.join()
-'''
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-import rospy
-import paho.mqtt.client as mqtt
-import struct
-import math
-from sensor_msgs.msg import NavSatFixprint
-from std_msgs.msg import Float64
-from geometry_msgs.msg import Vector3
-
-class Test:
-	def __init__(self):
-		self.M_PI = 3.14159265
-		self.coordinate = []
-		self.client = mqtt.Client()
-		self.client.connect("192.168.1.230",1883,600)
-		self.velocity = 0.2
-		#self.message = struct.pack('>ffB', self.velocity, 0, 50)
-		#self.topic = '/ctrl'
-		self.pub = rospy.Publisher('ctrlBoat', Vector3, queue_size=10)
-		self.f = file('velocity.txt', 'a+')
-
-	def callback(self, data):
-		vE = data.position_covariance[5]
-		vN = data.position_covariance[6]
-		V = (vE**2 + vN**2)**0.5
-
-
-		context = str(self.velocity) + '\t' + str(V) + '\n'
-		self.f.write(context)
-		#self.f.close()
-		print("current velocity: ",V)
-
-		ctrl = Vector3()
-		ctrl.x = self.velocity
-		ctrl.y = 0.0
-		
-		self.pub.publish(ctrl)
-
-	def listener(self):
-		rospy.init_node('test', anonymous=True)
-		print('init success')
-		# 节点订阅
-		rospy.Subscriber("unionstrong/gpfpd", NavSatFix, self.callback)
-		print('callback success')
-		rospy.spin()
-
-	def currentVelocity(self):
-		if len(self.coordinate) < 2:
-			return None
-		else:
-			dx = self.coordinate[-1][0] - self.coordinate[-2][0]
-			dy = self.coordinate[-1][1] - self.coordinate[-2][1]
-			velocity = (dx**2 + dy**2)**0.5 * 20
-			return velocity
-
-test = Test()
-test.listener()
-'''

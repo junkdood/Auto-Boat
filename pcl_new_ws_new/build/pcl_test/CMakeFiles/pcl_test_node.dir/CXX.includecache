@@ -11,7 +11,13 @@ pcl_test_core.h
 /home/d402/pcl_new_ws_new/src/pcl_test/src/pcl_test_core.h
 cmath
 -
-time.h
+iostream
+-
+pcl/io/pcd_io.h
+-
+pcl/point_types.h
+-
+pcl/filters/voxel_grid.h
 -
 
 /home/d402/pcl_new_ws_new/src/pcl_test/src/pcl_test_core.h

@@ -94,7 +94,7 @@ class mpc_stanly_com(object):
 
 	def listener(self):
 		rospy.Subscriber("unionstrong/gpfpd",NavSatFix,self.get_gps)
-		rospy.Subscriber("filtered_points",Float64MultiArray,self.get_obs,queue_size=1)
+		#rospy.Subscriber("filtered_points",Float64MultiArray,self.get_obs,queue_size=1)
 		rospy.Subscriber("ballcolor",Color,self.get_deci)
 		print('start to listen the msg and MPCing\n')
 		rospy.spin()
@@ -145,14 +145,13 @@ class mpc_stanly_com(object):
 				obs[0].append(gox)
 				obs[1].append(goy)			
 				print("obs pos:",localx,localy,gox,goy)
-				if len(obs[0]) == 1 :
+				if len(obs[0]) == 3 :
 					left_goal([gox,goy])
-				elif len(obs[0]) == 3:
-					round_goal([gox,goy])
 				elif len(obs[0]) == 4:
+					round_goal([gox,goy])
+				elif len(obs[0]) == 5:
 					right_goal([gox,goy])
-				else:
-					right_goal([gox,goy])
+				
 
 	def get_gps(self, msg):
 		#print("strat recv gps\n")
@@ -489,11 +488,19 @@ if __name__ == '__main__':
 	if_arrived_current = False
 	decide_angle = 0
 	points_angle = []
-	x1,y1 = gps_to_mkt1(113.61178468,22.37368653)
-	x2,y2 = gps_to_mkt1(113.61178468+2*(113.61180969-113.61178468),22.37368653+2 * (22.37390888 - 22.37368653))
-	destination = [x2+10,y2+10]
+	x1,y1 = gps_to_mkt1(113.70021786,22.01929372)
+	x2,y2 = gps_to_mkt1(113.69985344,22.01937399)
+	x3,y3 = gps_to_mkt1(113.69973397,22.01957511)
+	x4,y4 = gps_to_mkt1(113.69962583,22.01953778)
+	x5,y5 = gps_to_mkt1(113.69965461,22.01968713)
+	x6,y6 = gps_to_mkt1(113.69974144,22.01973531)
+	x7,y7 = gps_to_mkt1(113.69973397,22.01957511)
+	x8,y8 = gps_to_mkt1(113.69962583,22.01953778)
+	x9,y9 = gps_to_mkt1(113.69960607,22.01992731)
+	x10,y10 = gps_to_mkt1(113.69925856,22.01990157)
+	destination = [x10+10,y10+10]
 
-	des = [[x1,y1,0],[x2,y2,0]]
+	des = [[x1,y1,0],[x2,y2,0],[x3,y3,0],[x4,y4,0],[x5,y5,0],[x6,y6,0],[x7,y7,0],[x8,y8,0],[x9,y9,0],[x10,y10,0]]
 	target_pointx = []  # 自己随便设置的一些目标点
 	target_pointy = []
 	ki = 0.2

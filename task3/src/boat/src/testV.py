@@ -50,44 +50,42 @@ def round_goal(point):
 	des.insert(-1,p4)
 	des.insert(-1,p1)
 
-def left_goal(point):
+def straight_goal(point):
 	global boat,goal_num,des
 	if point[0] == boat[0]:
-		des.insert(goal_num,[point[0],point[1]+5,0])
+		des.insert(goal_num,[point[0],point[1] - 15,0])
 	else:
 		theta = math.atan((point[1]-boat[1])/(point[0]-boat[0]))
 		phi = math.sqrt((point[1]-boat[1])**2 + (point[0]-boat[0])**2)
 		if point[0]-boat[0] < 0:
 			theta -= math.pi
-		theta += 15/180*math.pi
-		x = boat[0] + phi*math.cos(theta)
-		y = boat[1] + phi*math.sin(theta)
-		des.insert(goal_num,[x,y,0])
-
-def right_goal(point):
-	global boat,goal_num,des
-	if point[0] == boat[0]:
-		des.insert(goal_num,[point[0],point[1] - 5,0])
-	else:
-		theta = math.atan((point[1]-boat[1])/(point[0]-boat[0]))
-		phi = math.sqrt((point[1]-boat[1])**2 + (point[0]-boat[0])**2)
-		if point[0]-boat[0] < 0:
-			theta += math.pi
-		theta -= 15/180*math.pi
-		x = boat[0] + phi*math.cos(theta)
-		y = boat[1] + phi*math.sin(theta)
+		x = boat[0] + (phi - 15)*math.cos(theta)
+		y = boat[1] + (phi - 15)*math.sin(theta)
 		des.insert(goal_num,[x,y,0])
 
 # 障碍物铝箔，false表示需要滤掉
 def obs_filter(point):
-	global obs,goal_num,des
+	global obs,goal_num,des,boat
+	# updata map in specific area
 	for i in range(len(obs[0])):
 		dist = (point[0] - obs[0][i])**2 + (point[1] - obs[1][i])**2
-		if dist < obsfi:
+		dist_boat = (boat[0] - obs[0][i])**2 + (boat[1] - obs[1][i])**2
+		if dist < obsfi and dist_boat < 400:
+			obs[0][i] = point[0]
+			obs[1][i] = point[1]
+			return False
+		elif dist < obsfi and dist_boat >= 400:
 			obs[0][i] = (point[0] + obs[0][i])/2
 			obs[1][i] = (point[1] + obs[1][i])/2
 			return False
 	return True
+
+def find_nearest_obs():
+	global obstem
+	dist_boat = []
+	for i in range(len(obstem[0])):
+		dist_boat.append((boat[0] - obstem[0][i])**2 + (boat[1] - obstem[1][i])**2)
+	return dist_boat.index(min(dist_boat))
 
 class mpc_stanly_com(object):
 	# 初始化和接受信息的部分
@@ -122,21 +120,20 @@ class mpc_stanly_com(object):
 			return False
 
 	def get_deci(self, msg):
-		print("strat recv deci\n")
 		global deci
+		print("strat recv deci\n")
 		print('======================================================')
 		print("color : r g b",msg.r,msg.b,msg.g)
 		print('======================================================')
-		if msg.r == 1 or msg.g == 1:
-			deci = True 
+		if msg.b == 1 :
+			deci = False
 		else:
-			deci = False	
-
-
+			deci = True
+				
 
 	def get_obs(self, msg):
 		print("strat recv obs\n")
-		global obs,deci
+		global obs,deci,des,obstem
 		local_pos = msg.data
 		print("num of ob:",len(local_pos),len(local_pos)/2)
 		for i in range(int(len(local_pos)/2)):
@@ -146,9 +143,24 @@ class mpc_stanly_com(object):
 			goy=boat[1] - localy*math.cos(boat[2])+localx*math.sin(boat[2])
 			if obs_filter([gox,goy]):
 				obs[0].append(gox)
-				obs[1].append(goy)			
-				print("obs pos:",localx,localy,gox,goy)
-				round_goal([gox,goy])
+				obs[1].append(goy)
+				obstem[0].append(gox)
+				obstem[1].append(goy)
+		if (not goal_num==3) and if_arrived_current:	
+			des = []
+			goal_num = 0
+			index = find_nearest_obs()
+			des.insert(0,[obstem[0][index],obstem[1][index],0])
+			if if_arrived_current and deci:
+				del des[0]
+				del obstem[0][index]
+				del obstem[1][index]
+				round_goal([obstem[0][index],obstem[1][index])
+		else:
+			des = []
+			goal_num = 0
+			index = find_nearest_obs()
+			des.insert(0,[obstem[0][index],obstem[1][index],0])
 				
 				
 
@@ -175,7 +187,7 @@ class mpc_stanly_com(object):
 		else:
 			tempan = -boat[2] + np.pi/2
 
-		if not had_arrive_the_dis:
+		if not had_arrive_the_dis and not len(des) == 0:
 			if self.flag%4 == 0:
 				temp_target_pointx,temp_target_pointy = planning([boat[0], boat[1], tempan], des[goal_num], 20)
 				if self.if_change_ref(temp_target_pointx,temp_target_pointy,target_pointx,target_pointy) :
@@ -508,11 +520,13 @@ if __name__ == '__main__':
 	file_path = r'data_log.csv'  #设置log文件位置
 	data_to_log = ["pointx","pointy","angle","time","goal_num","target_num","ki","heading_dis","et","decide_angle","speed","w","miss","max_miss"] #存储文件的内容
 	obs = [[],[]]
+	obstem = [[],[]]
 	deci = False
 	max_miss = 0
 	t1 = Thread(target=plot_ponit)
 	t1.start()
-	target_pointx,target_pointy = planning([xtem,ytem, 0], des[goal_num], 20)
+	if not len(des) == 0:
+		target_pointx,target_pointy = planning([xtem,ytem, 0], des[goal_num], 20)
 	rospy.init_node("Mpc_Stanly_com",anonymous=True)
 	print("thread create\n")
 	mpc_stanly = mpc_stanly_com()

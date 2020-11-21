@@ -266,7 +266,7 @@ void PclTestCore::detectObjectsOnCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr &clou
         seg.setMethodType(pcl::SAC_RANSAC);//设置随机采样一致性方法类型
         // you can modify the parameter below
   		seg.setMaxIterations(1000);//表示点到估计模型的距离最大值，
-        seg.setDistanceThreshold(0.4);//设定距离阀值，距离阀值决定了点被认为是局内点是必须满足的条件
+        seg.setDistanceThreshold(0.7);//设定距离阀值，距离阀值决定了点被认为是局内点是必须满足的条件
         seg.setInputCloud(cloud);
         //引发分割实现，存储分割结果到点几何inliers及存储平面模型的系数coefficients
         seg.segment(*inliers, *coefficients);

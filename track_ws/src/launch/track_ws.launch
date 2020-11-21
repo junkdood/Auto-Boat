@@ -1,0 +1,4 @@
+<launch>
+	<node pkg="send_gps" type="send_gps" name="send_gps" required="true" output="screen"/>
+	<node pkg="print_the_track" type="print_the_track" name="print_the_track" required="true" output="screen"/>
+</launch>

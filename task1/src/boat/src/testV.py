@@ -16,10 +16,10 @@ from threading import Thread
 import xlwt
 from matplotlib import pyplot as plt
 
-pub_speed = 0.6 #马达动力百分比
+pub_speed = 0.7 #马达动力百分比
 obsfi = 16 #两个障碍物距离的平方小于这个数时，被认为是同一个障碍物
 planfi = 10000 #用于过滤掉不合理的规划
-goalsize = 5 #离目标点多远时认为已经到达
+goalsize =10 #离目标点多远时认为已经到达
 
 def write_data():
 	global file_path, data_to_log
@@ -417,7 +417,7 @@ def planning(x_c,x_s,N_pre):
 
 		## 尽可能满足运动学约束的cost
 		dynamic_error = (X[0,i+1] - x_next_[0])**2 + (X[0,i+1] - x_next_[0])**2 + (X[1,i+1] - x_next_[1])**2
-		obj = obj + state_error + control_error + 30 * horizon_error + 10000*dynamic_error
+		obj = obj + state_error + control_error + 100 * horizon_error + 10000*dynamic_error
 		#g.append(X[:, i + 1] - x_next_)
 
 	#### obsatcle constraints
@@ -491,13 +491,12 @@ if __name__ == '__main__':
 	if_arrived_current = False
 	decide_angle = 0
 	points_angle = []
-	destination = [0,0]
-	x1,y1 = gps_to_mkt1(113.70008576,22.01968414)
-	x2,y2 = gps_to_mkt1(113.69964835,22.01880615)
-	x3,y3 = gps_to_mkt1(113.69939911,22.01950419)
-	x4,y4 = gps_to_mkt1(113.69884611,22.01932766)
-	x5,y5 = gps_to_mkt1(113.69888698,22.01978416)
-	des = [[x1,y1,0],[x2,y2,0],[x3,y3,0],[x4,y4,0],[x5,y5,0]]
+	
+	x1,y1 = gps_to_mkt1(113.69733732,22.02034979)
+	x2,y2 = gps_to_mkt1(113.69830309,22.02101488)
+	x3,y3 = gps_to_mkt1(113.6988082,22.02083022)
+	des = [[x1,y1,0],[x2,y2,0],[x3,y3,0],[x1,y1,0]]
+	destination = [x3+10,y3+10]
 	target_pointx = []  # 自己随便设置的一些目标点
 	target_pointy = []
 	ki = 0.2

@@ -36,14 +36,19 @@ def gps_to_mkt1(longitude,latitude):
 
 def round_goal(point):
 	global boat,goal_num,des
-	p1 = [point[0] - 6,point[1] - 6,0]
-	p2 = [point[0] + 6,point[1] - 6,0]
-	p3 = [point[0] - 6,point[1] + 6,0]
-	p4 = [point[0] + 6,point[1] + 6,0]
-	des.insert(goal_num,p1)
-	des.insert(goal_num,p2)
-	des.insert(goal_num,p3)
-	des.insert(goal_num,p4)
+	p1 = [point[0] - 8,point[1] - 8,0]
+	p2 = [point[0] + 8,point[1] - 8,0]
+	p3 = [point[0] + 8,point[1] + 8,0]
+	p4 = [point[0] - 8,point[1] + 8,0]
+	# des.insert(goal_num,p1)
+	# des.insert(goal_num,p2)
+	# des.insert(goal_num,p3)
+	# des.insert(goal_num,p4)
+	des.insert(-1,p1)
+	des.insert(-1,p2)
+	des.insert(-1,p3)
+	des.insert(-1,p4)
+	des.insert(-1,p1)
 
 def left_goal(point):
 	global boat,goal_num,des
@@ -409,13 +414,13 @@ def planning(x_c,x_s,N_pre):
 
 		## 尽可能满足运动学约束的cost
 		dynamic_error = (X[0,i+1] - x_next_[0])**2 + (X[0,i+1] - x_next_[0])**2 + (X[1,i+1] - x_next_[1])**2
-		obj = obj + state_error + control_error + 30 * horizon_error + 10000*dynamic_error
+		obj = obj + state_error + control_error + 0 * horizon_error + 10000*dynamic_error
 		#g.append(X[:, i + 1] - x_next_)
 
 	#### obsatcle constraints
 	for i in range(N + 1):
 		for j in range(len(obs[0])):
-			obj = obj + 12000/ca.sqrt((X[0, i] - obs[0][j]) ** 2 + (X[1, i] - obs[1][j]) ** 2)
+			obj = obj + 5000/ca.sqrt((X[0, i] - obs[0][j]) ** 2 + (X[1, i] - obs[1][j]) ** 2)
 			#g.append(ca.sqrt((X[0, i] - obs[0][j]) ** 2 + (X[1, i] - obs[1][j]) ** 2))  # should be smaller als 0.0
 	opt_variables = ca.vertcat(ca.reshape(U, -1, 1), ca.reshape(X, -1, 1))
 
@@ -493,9 +498,9 @@ if __name__ == '__main__':
 	x9,y9 = gps_to_mkt1(113.69960607,22.01992731)
 	x10,y10 = gps_to_mkt1(113.69925856,22.01990157)
 	destination = [x10+10,y10+10]
-
+	xtem,ytem = gps_to_mkt1(113.69835457,22.02007477)
 	#des = [[x1,y1,0],[x2,y2,0],[x3,y3,0],[x4,y4,0],[x5,y5,0],[x6,y6,0],[x7,y7,0],[x8,y8,0],[x9,y9,0],[x10,y10,0]]
-	des = [[x1,y1,0],[x10,y10,0]]
+	des = [[xtem,ytem,0]]
 	target_pointx = []  # 自己随便设置的一些目标点
 	target_pointy = []
 	ki = 0.2
@@ -507,7 +512,7 @@ if __name__ == '__main__':
 	max_miss = 0
 	t1 = Thread(target=plot_ponit)
 	t1.start()
-	target_pointx,target_pointy = planning([x1,y1, 0], des[goal_num], 20)
+	target_pointx,target_pointy = planning([xtem,ytem, 0], des[goal_num], 20)
 	rospy.init_node("Mpc_Stanly_com",anonymous=True)
 	print("thread create\n")
 	mpc_stanly = mpc_stanly_com()

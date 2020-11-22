@@ -29,7 +29,7 @@ class GPS():
 			print(data)
 			msg = data.split(",")
 			#print(msg)
-			if len(msg)==18 and '\x00' not in data:
+			if len(msg)==18 and '\x00' not in data and msg[0] == '$GPFPS':
 				current_fix = NavSatFix()
 				current_fix.latitude = float(msg[6])
 				current_fix.longitude = float(msg[7])

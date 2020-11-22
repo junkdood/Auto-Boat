@@ -18,7 +18,7 @@ from matplotlib import pyplot as plt
 
 
 pub_speed = 0.6 #马达动力百分比
-obsfi = 25 #两个障碍物距离的平方小于这个数时，被认为是同一个障碍物
+obsfi = 49 #两个障碍物距离的平方小于这个数时，被认为是同一个障碍物
 planfi = 10000 #用于过滤掉不合理的规划
 goalsize = 5 #离目标点多远时认为已经到达
 
@@ -36,10 +36,10 @@ def gps_to_mkt1(longitude,latitude):
 
 def round_goal(point):
 	global boat,goal_num,des
-	p1 = [point[0] - 8,point[1] - 8,0]
-	p2 = [point[0] + 8,point[1] - 8,0]
-	p3 = [point[0] + 8,point[1] + 8,0]
-	p4 = [point[0] - 8,point[1] + 8,0]
+	p1 = [point[0] - 6,point[1] - 6,0]
+	p2 = [point[0] + 6,point[1] - 6,0]
+	p3 = [point[0] + 6,point[1] + 6,0]
+	p4 = [point[0] - 6,point[1] + 6,0]
 	# des.insert(goal_num,p1)
 	# des.insert(goal_num,p2)
 	# des.insert(goal_num,p3)
@@ -133,7 +133,7 @@ class mpc_stanly_com(object):
 
 	def get_obs(self, msg):
 		print("strat recv obs\n")
-		global obs,deci,des,obstem
+		global obs,deci,des,obstem,goal_num
 		local_pos = msg.data
 		print("num of ob:",len(local_pos),len(local_pos)/2)
 		for i in range(int(len(local_pos)/2)):
@@ -146,21 +146,24 @@ class mpc_stanly_com(object):
 				obs[1].append(goy)
 				obstem[0].append(gox)
 				obstem[1].append(goy)
-		if (not goal_num==3) and if_arrived_current:	
-			des = []
-			goal_num = 0
-			index = find_nearest_obs()
-			des.insert(0,[obstem[0][index],obstem[1][index],0])
-			if if_arrived_current and deci:
-				del des[0]
-				del obstem[0][index]
-				del obstem[1][index]
-				round_goal([obstem[0][index],obstem[1][index])
-		else:
-			des = []
-			goal_num = 0
-			index = find_nearest_obs()
-			des.insert(0,[obstem[0][index],obstem[1][index],0])
+		des = []
+		for i in range(len(obs[0])):
+			round_goal([obs[0][i],obs[1][i]])
+		# if (not goal_num==3) and if_arrived_current:	
+		# 	des = []
+		# 	goal_num = 0
+		# 	index = find_nearest_obs()
+		# 	des.insert(0,[obstem[0][index],obstem[1][index],0])
+		# 	if if_arrived_current and deci:
+		# 		del des[0]
+		# 		del obstem[0][index]
+		# 		del obstem[1][index]
+		# 		round_goal([obstem[0][index],obstem[1][index]])
+		# else:
+		# 	des = []
+		# 	goal_num = 0
+		# 	index = find_nearest_obs()
+		# 	des.insert(0,[obstem[0][index],obstem[1][index],0])
 				
 				
 
@@ -510,7 +513,7 @@ if __name__ == '__main__':
 	x9,y9 = gps_to_mkt1(113.69960607,22.01992731)
 	x10,y10 = gps_to_mkt1(113.69925856,22.01990157)
 	destination = [x10+10,y10+10]
-	xtem,ytem = gps_to_mkt1(113.69835457,22.02007477)
+	xtem,ytem = gps_to_mkt1(113.69875767,22.01991036)
 	#des = [[x1,y1,0],[x2,y2,0],[x3,y3,0],[x4,y4,0],[x5,y5,0],[x6,y6,0],[x7,y7,0],[x8,y8,0],[x9,y9,0],[x10,y10,0]]
 	des = [[xtem,ytem,0]]
 	target_pointx = []  # 自己随便设置的一些目标点

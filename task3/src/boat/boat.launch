@@ -1,7 +1,6 @@
 <launch>
-	<include file="/home/d402/pcl_new_ws_new/src/launch/pcl_test.launch"/>
-	<include file="/home/d402/track_ws/src/launch/track_ws.launch"/>
-	<include file="/home/d402/visual/launch/hik.launch"/>
+	<include file="/home/d402/pcl_new_ws_new/src/pcl_test/launch/pcl_test.launch" />
+	<include file="/home/d402/track_ws/src/launch/track_ws.launch" />
 	<node pkg="boat" type="collectMsg.py" name="collectMsg" required="true" output="screen"/>
 	<node pkg="boat" type="getVH_sendVH.py" name="getVH_sendVH" required="true" output="screen"/>
 	<node pkg="boat" type="testV.py" name="planning_and_track" required="true" output="screen"/>

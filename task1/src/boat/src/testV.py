@@ -18,8 +18,8 @@ from matplotlib import pyplot as plt
 
 pub_speed = 0.7 #马达动力百分比
 obsfi = 16 #两个障碍物距离的平方小于这个数时，被认为是同一个障碍物
-planfi = 10000 #用于过滤掉不合理的规划
-goalsize =10 #离目标点多远时认为已经到达
+planfi = 10000000000000 #用于过滤掉不合理的规划
+goalsize =8 #离目标点多远时认为已经到达
 
 def write_data():
 	global file_path, data_to_log

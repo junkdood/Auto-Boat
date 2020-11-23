@@ -19,8 +19,8 @@ from matplotlib import pyplot as plt
 
 pub_speed = 0.6 #马达动力百分比
 obsfi = 25 #两个障碍物距离的平方小于这个数时，被认为是同一个障碍物
-planfi = 10000 #用于过滤掉不合理的规划
-goalsize = 5 #离目标点多远时认为已经到达
+planfi = 100000000000000 #用于过滤掉不合理的规划
+goalsize = 3 #离目标点多远时认为已经到达
 
 def write_data():
 	global file_path, data_to_log
@@ -37,18 +37,19 @@ def gps_to_mkt1(longitude,latitude):
 def round_goal(point):
 	global boat,goal_num,des
 	p1 = [point[0] - 6,point[1] - 6,0]
-	p2 = [point[0] + 6,point[1] - 6,0]
-	p3 = [point[0] - 6,point[1] + 6,0]
-	p4 = [point[0] + 6,point[1] + 6,0]
-	des.insert(goal_num,p1)
-	des.insert(goal_num,p2)
-	des.insert(goal_num,p3)
-	des.insert(goal_num,p4)
+	p2 = [point[0] - 6,point[1] + 6,0]
+	p3 = [point[0] + 6,point[1] + 6,0]
+	p4 = [point[0] + 6,point[1] - 6,0]
+	des.insert(-1,p1)
+	des.insert(-1,p4)
+	des.insert(-1,p3)
+	des.insert(-1,p2)
+	des.insert(-1,p1)
 
 def left_goal(point):
 	global boat,goal_num,des
 	if point[0] == boat[0]:
-		des.insert(goal_num,[point[0],point[1]+5,0])
+		des.insert(-1,[point[0],point[1]+5,0])
 	else:
 		theta = math.atan((point[1]-boat[1])/(point[0]-boat[0]))
 		phi = math.sqrt((point[1]-boat[1])**2 + (point[0]-boat[0])**2)
@@ -57,12 +58,12 @@ def left_goal(point):
 		theta += 15/180*math.pi
 		x = boat[0] + phi*math.cos(theta)
 		y = boat[1] + phi*math.sin(theta)
-		des.insert(goal_num,[x,y,0])
+		des.insert(-1,[x,y,0])
 
 def right_goal(point):
 	global boat,goal_num,des
 	if point[0] == boat[0]:
-		des.insert(goal_num,[point[0],point[1] - 5,0])
+		des.insert(-1,[point[0],point[1] - 5,0])
 	else:
 		theta = math.atan((point[1]-boat[1])/(point[0]-boat[0]))
 		phi = math.sqrt((point[1]-boat[1])**2 + (point[0]-boat[0])**2)
@@ -71,7 +72,11 @@ def right_goal(point):
 		theta -= 15/180*math.pi
 		x = boat[0] + phi*math.cos(theta)
 		y = boat[1] + phi*math.sin(theta)
-		des.insert(goal_num,[x,y,0])
+		des.insert(-1,[x,y,0])
+
+def center_goal(i,j):
+	global goal_num,des,obs
+	des.insert(goal_num,[(obs[0][i]+obs[0][j])/2,(obs[1][i]+obs[1][j])/2,0])
 
 # 障碍物铝箔，false表示需要滤掉
 def obs_filter(point):
@@ -95,7 +100,7 @@ class mpc_stanly_com(object):
 	def listener(self):
 		rospy.Subscriber("unionstrong/gpfpd",NavSatFix,self.get_gps)
 		rospy.Subscriber("filtered_points",Float64MultiArray,self.get_obs,queue_size=1)
-		rospy.Subscriber("ballcolor",Color,self.get_deci)
+		#rospy.Subscriber("ballcolor",Color,self.get_deci)
 		print('start to listen the msg and MPCing\n')
 		rospy.spin()
 
@@ -107,14 +112,15 @@ class mpc_stanly_com(object):
 		return x,y
 
 	def if_change_ref(self,x1,y1,x2,y2):
-		error = 0
-		thr = planfi
-		for i in range(len(x1)):
-			error = error + (x1[i]-x2[i])**2 + (y1[i]-y2[i])**2
-		if error < thr:
-			return True
-		else:
-			return False
+		return True
+		# error = 0
+		# thr = planfi
+		# for i in range(len(x1)):
+		# 	error = error + (x1[i]-x2[i])**2 + (y1[i]-y2[i])**2
+		# if error < thr:
+		# 	return True
+		# else:
+		# 	return False
 
 	def get_deci(self, msg):
 		print("strat recv deci\n")
@@ -143,12 +149,16 @@ class mpc_stanly_com(object):
 				obs[0].append(gox)
 				obs[1].append(goy)			
 				print("obs pos:",localx,localy,gox,goy)
-				if len(obs[0]) == 3 :
+				if len(obs[0]) == 2:
+					center_goal(0,1)
+				elif len(obs[0]) == 3 :
 					left_goal([gox,goy])
 				elif len(obs[0]) == 4:
 					round_goal([gox,goy])
 				elif len(obs[0]) == 5:
 					right_goal([gox,goy])
+				elif len(obs[0]) == 7:
+					center_goal(5,6)
 				
 
 	def get_gps(self, msg):
@@ -486,20 +496,11 @@ if __name__ == '__main__':
 	if_arrived_current = False
 	decide_angle = 0
 	points_angle = []
-	x1,y1 = gps_to_mkt1(113.70021786,22.01929372)
-	x2,y2 = gps_to_mkt1(113.69985344,22.01937399)
-	x3,y3 = gps_to_mkt1(113.69973397,22.01957511)
-	x4,y4 = gps_to_mkt1(113.69962583,22.01953778)
-	x5,y5 = gps_to_mkt1(113.69965461,22.01968713)
-	x6,y6 = gps_to_mkt1(113.69974144,22.01973531)
-	x7,y7 = gps_to_mkt1(113.69973397,22.01957511)
-	x8,y8 = gps_to_mkt1(113.69962583,22.01953778)
-	x9,y9 = gps_to_mkt1(113.69960607,22.01992731)
-	x10,y10 = gps_to_mkt1(113.69925856,22.01990157)
-	destination = [x10+10,y10+10]
+	x1,y1 = gps_to_mkt1(113.69930154,22.01973897)
+	destination = [x1+10,y1+10]
 
 	#des = [[x1,y1,0],[x2,y2,0],[x3,y3,0],[x4,y4,0],[x5,y5,0],[x6,y6,0],[x7,y7,0],[x8,y8,0],[x9,y9,0],[x10,y10,0]]
-	des = [[x1,y1,0],[x10,y10,0]]
+	des = [[x1,y1,0]]
 	target_pointx = []  # 自己随便设置的一些目标点
 	target_pointy = []
 	ki = 0.2

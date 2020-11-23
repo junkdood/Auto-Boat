@@ -19,7 +19,7 @@ from matplotlib import pyplot as plt
 
 pub_speed = 0.6 #马达动力百分比
 obsfi = 49 #两个障碍物距离的平方小于这个数时，被认为是同一个障碍物
-planfi = 7000 #用于过滤掉不合理的规划
+planfi = 1000000000000000 #用于过滤掉不合理的规划
 goalsize = 5 #离目标点多远时认为已经到达
 
 def write_data():
@@ -125,7 +125,7 @@ class mpc_stanly_com(object):
 		print('======================================================')
 		print("color : r g b",msg.r,msg.b,msg.g)
 		print('======================================================')
-		if msg.g >= 1 :
+		if msg.r >= 1 :
 			deci = True
 		else:
 			deci = False
@@ -146,9 +146,10 @@ class mpc_stanly_com(object):
 				obs[1].append(goy)
 				obstem[0].append(gox)
 				obstem[1].append(goy)
-		des = []
-		for i in range(len(obs[0])):
-			round_goal([obs[0][i],obs[1][i]])
+		if not len(local_pos) == 0: 
+			des = []
+			for i in range(len(obs[0])):
+				round_goal([obs[0][i],obs[1][i]])
 		# if (not goal_num==3) and if_arrived_current:	
 		# 	des = []
 		# 	goal_num = 0
@@ -516,7 +517,7 @@ if __name__ == '__main__':
 	x9,y9 = gps_to_mkt1(113.69960607,22.01992731)
 	x10,y10 = gps_to_mkt1(113.69925856,22.01990157)
 	destination = [x10+10,y10+10]
-	xtem,ytem = gps_to_mkt1(113.69936919,22.02004144)
+	xtem,ytem = gps_to_mkt1(113.69913539,22.02006943)
 
 	#des = [[x1,y1,0],[x2,y2,0],[x3,y3,0],[x4,y4,0],[x5,y5,0],[x6,y6,0],[x7,y7,0],[x8,y8,0],[x9,y9,0],[x10,y10,0]]
 	des = [[xtem,ytem,0]]

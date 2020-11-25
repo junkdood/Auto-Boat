@@ -19,7 +19,7 @@ from matplotlib import pyplot as plt
 pub_speed = 0.7 #马达动力百分比
 obsfi = 16 #两个障碍物距离的平方小于这个数时，被认为是同一个障碍物
 planfi = 10000000000000 #用于过滤掉不合理的规划
-goalsize =8 #离目标点多远时认为已经到达
+goalsize =10 #离目标点多远时认为已经到达
 
 def write_data():
 	global file_path, data_to_log
@@ -492,11 +492,13 @@ if __name__ == '__main__':
 	decide_angle = 0
 	points_angle = []
 	
-	x1,y1 = gps_to_mkt1(113.69733732,22.02034979)
-	x2,y2 = gps_to_mkt1(113.69830309,22.02101488)
-	x3,y3 = gps_to_mkt1(113.6988082,22.02083022)
-	des = [[x1,y1,0],[x2,y2,0],[x3,y3,0],[x1,y1,0]]
-	destination = [x3+10,y3+10]
+	x1,y1 = gps_to_mkt1(113.69949880,22.01923364)
+	x2,y2 = gps_to_mkt1(113.69895163,22.01821414)
+	x3,y3 = gps_to_mkt1(113.69856539,22.01957181)
+	x4,y4 = gps_to_mkt1(113.69724038,22.01880595)
+	x5,y5 = gps_to_mkt1(113.69774464,22.01990501)
+	des = [[x1,y1,0],[x2,y2,0],[x3,y3,0],[x4,y4,0],[x5,y5,0]]
+	destination = [x5+10,y5+10]
 	target_pointx = []  # 自己随便设置的一些目标点
 	target_pointy = []
 	ki = 0.2

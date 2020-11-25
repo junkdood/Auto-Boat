@@ -17,8 +17,8 @@ import xlwt
 from matplotlib import pyplot as plt
 
 
-pub_speed = 0.6 #马达动力百分比
-obsfi = 49 #两个障碍物距离的平方小于这个数时，被认为是同一个障碍物
+pub_speed = 0.65 #马达动力百分比
+obsfi = 100 #两个障碍物距离的平方小于这个数时，被认为是同一个障碍物
 planfi = 1000000000000000 #用于过滤掉不合理的规划
 goalsize = 5 #离目标点多远时认为已经到达
 
@@ -516,8 +516,9 @@ if __name__ == '__main__':
 	x8,y8 = gps_to_mkt1(113.69962583,22.01953778)
 	x9,y9 = gps_to_mkt1(113.69960607,22.01992731)
 	x10,y10 = gps_to_mkt1(113.69925856,22.01990157)
-	destination = [x10+10,y10+10]
-	xtem,ytem = gps_to_mkt1(113.69913539,22.02006943)
+	xtem1,ytem1 = gps_to_mkt1(113.69795922,22.02037745)
+	destination = [xtem1,ytem1]
+	xtem,ytem = gps_to_mkt1(113.69964901,22.01968619)
 
 	#des = [[x1,y1,0],[x2,y2,0],[x3,y3,0],[x4,y4,0],[x5,y5,0],[x6,y6,0],[x7,y7,0],[x8,y8,0],[x9,y9,0],[x10,y10,0]]
 	des = [[xtem,ytem,0]]

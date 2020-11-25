@@ -18,9 +18,9 @@ from matplotlib import pyplot as plt
 
 
 pub_speed = 0.6 #马达动力百分比
-obsfi = 25 #两个障碍物距离的平方小于这个数时，被认为是同一个障碍物
+obsfi = 100 #两个障碍物距离的平方小于这个数时，被认为是同一个障碍物
 planfi = 100000000000000 #用于过滤掉不合理的规划
-goalsize = 3 #离目标点多远时认为已经到达
+goalsize = 5 #离目标点多远时认为已经到达
 
 def write_data():
 	global file_path, data_to_log
@@ -76,7 +76,7 @@ def right_goal(point):
 
 def center_goal(i,j):
 	global goal_num,des,obs
-	des.insert(goal_num,[(obs[0][i]+obs[0][j])/2,(obs[1][i]+obs[1][j])/2,0])
+	des.insert(-1,[(obs[0][i]+obs[0][j])/2,(obs[1][i]+obs[1][j])/2,0])
 
 # 障碍物铝箔，false表示需要滤掉
 def obs_filter(point):
@@ -151,14 +151,17 @@ class mpc_stanly_com(object):
 				print("obs pos:",localx,localy,gox,goy)
 				if len(obs[0]) == 2:
 					center_goal(0,1)
-				elif len(obs[0]) == 3 :
-					left_goal([gox,goy])
 				elif len(obs[0]) == 4:
-					round_goal([gox,goy])
+					left_goal([gox,goy])
 				elif len(obs[0]) == 5:
+					round_goal([gox,goy])
+				elif len(obs[0]) == 6:
 					right_goal([gox,goy])
-				elif len(obs[0]) == 7:
+				elif len(obs[0]) == 8:
 					center_goal(5,6)
+				else:
+					pass
+
 				
 
 	def get_gps(self, msg):
@@ -496,11 +499,12 @@ if __name__ == '__main__':
 	if_arrived_current = False
 	decide_angle = 0
 	points_angle = []
-	x1,y1 = gps_to_mkt1(113.69930154,22.01973897)
-	destination = [x1+10,y1+10]
+	x1,y1 = gps_to_mkt1(113.69978958,22.01934276)
+	x2,y2 = gps_to_mkt1(113.69839026,22.02088831)
+	destination = [x2+10,y2+10]
 
 	#des = [[x1,y1,0],[x2,y2,0],[x3,y3,0],[x4,y4,0],[x5,y5,0],[x6,y6,0],[x7,y7,0],[x8,y8,0],[x9,y9,0],[x10,y10,0]]
-	des = [[x1,y1,0]]
+	des = [[x1,y1,0],[x2,y2,0]]
 	target_pointx = []  # 自己随便设置的一些目标点
 	target_pointy = []
 	ki = 0.2

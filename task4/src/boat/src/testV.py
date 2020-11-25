@@ -486,12 +486,24 @@ if __name__ == '__main__':
 	decide_angle = 0
 	points_angle = []
 	x1,y1 = gps_to_mkt1(113.69867452,22.02056999)
-	x2,y2 = gps_to_mkt1(113.69923046,22.01983538)
+	
 	x3,y3 = gps_to_mkt1(113.69985223,22.01955776)
-	destination = [x3+10,y3+10]
+	
+	x5,y5 = gps_to_mkt1(113.69923046,22.01983538)
+
+	theta1 = math.atan2(y3 - y1,x3 - x1)
+	theta2 = theta1+math.pi/6
+	theta3 = theta1-math.pi/6
+
+	x2 = x1 + math.sqrt((x3-x1)**2+(y3-y1)**2)*math.cos(theta1)*2/(math.sqrt(3))
+	y2 = y1 + math.sqrt((x3-x1)**2+(y3-y1)**2)*math.sin(theta1)*2/(math.sqrt(3))
+	x4 = x1 + math.sqrt((x3-x1)**2+(y3-y1)**2)*math.cos(theta2)*2/(math.sqrt(3))
+	y4 = y1 + math.sqrt((x3-x1)**2+(y3-y1)**2)*math.sin(theta2)*2/(math.sqrt(3))
+	
+	destination = [x5+10,y5+10]
 
 	#des = [[x1,y1,0],[x2,y2,0],[x3,y3,0],[x4,y4,0],[x5,y5,0],[x6,y6,0],[x7,y7,0],[x8,y8,0],[x9,y9,0],[x10,y10,0]]
-	des = [[x1,y1,0],[x2,y2,0],[x3,y3,0]]
+	des = [[x1,y1,0],[x2,y2,0],[x3,y3,0],[x4,y4,0],[x5,y5,0]]
 	target_pointx = []  # 自己随便设置的一些目标点
 	target_pointy = []
 	ki = 0.2

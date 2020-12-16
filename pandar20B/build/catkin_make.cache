@@ -1,2 +1,0 @@
-HesaiLidar_General_ROS
--DCATKIN_DEVEL_PREFIX=/home/d402/pandar20B/devel -DCMAKE_INSTALL_PREFIX=/home/d402/pandar20B/install -G Unix Makefiles

@@ -1,2 +1,0 @@
-pcl_test
--DCATKIN_DEVEL_PREFIX=/home/d402/pcl_new_ws/devel -DCMAKE_INSTALL_PREFIX=/home/d402/pcl_new_ws/install -G Unix Makefiles

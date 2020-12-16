@@ -17,7 +17,7 @@ import xlwt
 from matplotlib import pyplot as plt
 
 
-pub_speed = 0.8 #马达动力百分比
+pub_speed = 0.9 #马达动力百分比
 obsfi = 25 #两个障碍物距离的平方小于这个数时，被认为是同一个障碍物
 planfi = 100000000 #用于过滤掉不合理的规划
 goalsize = 7 #离目标点多远时认为已经到达
@@ -318,8 +318,8 @@ def plot_ponit():
 	while True:
 		plt.clf()
 		plt.axis('equal')
-		plt.xlim(boat[0] - 30, boat[0] + 30)
-		plt.ylim(boat[1] - 50, boat[1] + 30)
+		plt.xlim(boat[0] - 100, boat[0] + 100)
+		plt.ylim(boat[1] - 100, boat[1] + 100)
 		plt.xlabel(boat[0])
 		plt.ylabel(boat[1])
 		plt.title(goal_num)
@@ -485,25 +485,29 @@ if __name__ == '__main__':
 	if_arrived_current = False
 	decide_angle = 0
 	points_angle = []
-	x1,y1 = gps_to_mkt1(113.69867452,22.02056999)
+	x1,y1 = gps_to_mkt1(113.69964901,22.01968619)
 	
-	x3,y3 = gps_to_mkt1(113.69985223,22.01955776)
+	x4,y4 = gps_to_mkt1(113.69898723,22.02014708)
 	
-	x5,y5 = gps_to_mkt1(113.69923046,22.01983538)
+	x7,y7 = gps_to_mkt1(113.69795922,22.02037745)
 
-	theta1 = math.atan2(y3 - y1,x3 - x1)
-	theta2 = theta1+math.pi/6
-	theta3 = theta1-math.pi/6
+	theta1 = math.atan2(y4 - y1,x4 - x1)
+	theta2 = theta1+math.pi/4
+	theta3 = theta1-math.pi/4
 
-	x2 = x1 + math.sqrt((x3-x1)**2+(y3-y1)**2)*math.cos(theta1)*2/(math.sqrt(3))
-	y2 = y1 + math.sqrt((x3-x1)**2+(y3-y1)**2)*math.sin(theta1)*2/(math.sqrt(3))
-	x4 = x1 + math.sqrt((x3-x1)**2+(y3-y1)**2)*math.cos(theta2)*2/(math.sqrt(3))
-	y4 = y1 + math.sqrt((x3-x1)**2+(y3-y1)**2)*math.sin(theta2)*2/(math.sqrt(3))
+	x3 = x1 + math.sqrt((x4-x1)**2+(y4-y1)**2)*math.cos(theta2)*2/(math.sqrt(2))
+	y3 = y1 + math.sqrt((x4-x1)**2+(y4-y1)**2)*math.sin(theta2)*2/(math.sqrt(2))
+	x2 = x1 + (x3 - x4)
+	y2 = y1 + (y3 - y4)
+	x5 = x1 + math.sqrt((x4-x1)**2+(y4-y1)**2)*math.cos(theta3)*2/(math.sqrt(2))
+	y5 = y1 + math.sqrt((x4-x1)**2+(y4-y1)**2)*math.sin(theta3)*2/(math.sqrt(2))
+	x6 = x7 + (x5 - x4)
+	y6 = y7 + (y5 - y4)
 	
-	destination = [x5+10,y5+10]
+	destination = [x7+10,y7+10]
 
 	#des = [[x1,y1,0],[x2,y2,0],[x3,y3,0],[x4,y4,0],[x5,y5,0],[x6,y6,0],[x7,y7,0],[x8,y8,0],[x9,y9,0],[x10,y10,0]]
-	des = [[x1,y1,0],[x2,y2,0],[x3,y3,0],[x4,y4,0],[x5,y5,0]]
+	des = [[x1,y1,0],[x2,y2,0],[x3,y3,0],[x4,y4,0],[x5,y5,0],[x6,y6,0],[x7,y7,0]]
 	target_pointx = []  # 自己随便设置的一些目标点
 	target_pointy = []
 	ki = 0.2

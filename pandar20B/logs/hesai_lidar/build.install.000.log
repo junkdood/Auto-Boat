@@ -1,0 +1,83 @@
+[ 21%] Built target PandarGeneral
+[ 39%] Built target PandarGeneralSDK
+[ 47%] Built target hesai_lidar_node
+[ 47%] Built target _hesai_lidar_generate_messages_check_deps_PandarScan
+[ 47%] Built target _hesai_lidar_generate_messages_check_deps_PandarPacket
+[ 47%] Built target std_msgs_generate_messages_py
+[ 60%] Built target hesai_lidar_generate_messages_py
+[ 60%] Built target std_msgs_generate_messages_nodejs
+[ 69%] Built target hesai_lidar_generate_messages_nodejs
+[ 69%] Built target std_msgs_generate_messages_eus
+[ 82%] Built target hesai_lidar_generate_messages_eus
+[ 82%] Built target std_msgs_generate_messages_lisp
+[ 91%] Built target hesai_lidar_generate_messages_lisp
+[ 91%] Built target std_msgs_generate_messages_cpp
+[100%] Built target hesai_lidar_generate_messages_cpp
+[100%] Built target hesai_lidar_generate_messages
+[36mInstall the project...[0m
+-- Install configuration: ""
+-- Installing: /home/d402/pandar20B/install/_setup_util.py
+-- Installing: /home/d402/pandar20B/install/env.sh
+-- Installing: /home/d402/pandar20B/install/setup.bash
+-- Installing: /home/d402/pandar20B/install/local_setup.bash
+-- Installing: /home/d402/pandar20B/install/setup.sh
+-- Installing: /home/d402/pandar20B/install/local_setup.sh
+-- Installing: /home/d402/pandar20B/install/setup.zsh
+-- Installing: /home/d402/pandar20B/install/local_setup.zsh
+-- Installing: /home/d402/pandar20B/install/.rosinstall
+-- Installing: /home/d402/pandar20B/install/share/hesai_lidar/msg/PandarPacket.msg
+-- Installing: /home/d402/pandar20B/install/share/hesai_lidar/msg/PandarScan.msg
+-- Installing: /home/d402/pandar20B/install/share/hesai_lidar/cmake/hesai_lidar-msg-paths.cmake
+-- Installing: /home/d402/pandar20B/install/include/hesai_lidar
+-- Installing: /home/d402/pandar20B/install/include/hesai_lidar/PandarScan.h
+-- Installing: /home/d402/pandar20B/install/include/hesai_lidar/PandarPacket.h
+-- Installing: /home/d402/pandar20B/install/share/roseus/ros/hesai_lidar
+-- Installing: /home/d402/pandar20B/install/share/roseus/ros/hesai_lidar/msg
+-- Installing: /home/d402/pandar20B/install/share/roseus/ros/hesai_lidar/msg/PandarPacket.l
+-- Installing: /home/d402/pandar20B/install/share/roseus/ros/hesai_lidar/msg/PandarScan.l
+-- Installing: /home/d402/pandar20B/install/share/roseus/ros/hesai_lidar/manifest.l
+-- Installing: /home/d402/pandar20B/install/share/common-lisp/ros/hesai_lidar
+-- Installing: /home/d402/pandar20B/install/share/common-lisp/ros/hesai_lidar/msg
+-- Installing: /home/d402/pandar20B/install/share/common-lisp/ros/hesai_lidar/msg/_package.lisp
+-- Installing: /home/d402/pandar20B/install/share/common-lisp/ros/hesai_lidar/msg/PandarPacket.lisp
+-- Installing: /home/d402/pandar20B/install/share/common-lisp/ros/hesai_lidar/msg/_package_PandarScan.lisp
+-- Installing: /home/d402/pandar20B/install/share/common-lisp/ros/hesai_lidar/msg/_package_PandarPacket.lisp
+-- Installing: /home/d402/pandar20B/install/share/common-lisp/ros/hesai_lidar/msg/hesai_lidar-msg.asd
+-- Installing: /home/d402/pandar20B/install/share/common-lisp/ros/hesai_lidar/msg/PandarScan.lisp
+-- Installing: /home/d402/pandar20B/install/share/gennodejs/ros/hesai_lidar
+-- Installing: /home/d402/pandar20B/install/share/gennodejs/ros/hesai_lidar/msg
+-- Installing: /home/d402/pandar20B/install/share/gennodejs/ros/hesai_lidar/msg/PandarScan.js
+-- Installing: /home/d402/pandar20B/install/share/gennodejs/ros/hesai_lidar/msg/PandarPacket.js
+-- Installing: /home/d402/pandar20B/install/share/gennodejs/ros/hesai_lidar/msg/_index.js
+-- Installing: /home/d402/pandar20B/install/share/gennodejs/ros/hesai_lidar/_index.js
+Listing /home/d402/pandar20B/devel/.private/hesai_lidar/lib/python2.7/dist-packages/hesai_lidar ...
+Compiling /home/d402/pandar20B/devel/.private/hesai_lidar/lib/python2.7/dist-packages/hesai_lidar/__init__.py ...
+Listing /home/d402/pandar20B/devel/.private/hesai_lidar/lib/python2.7/dist-packages/hesai_lidar/msg ...
+Compiling /home/d402/pandar20B/devel/.private/hesai_lidar/lib/python2.7/dist-packages/hesai_lidar/msg/_PandarPacket.py ...
+Compiling /home/d402/pandar20B/devel/.private/hesai_lidar/lib/python2.7/dist-packages/hesai_lidar/msg/_PandarScan.py ...
+Compiling /home/d402/pandar20B/devel/.private/hesai_lidar/lib/python2.7/dist-packages/hesai_lidar/msg/__init__.py ...
+-- Installing: /home/d402/pandar20B/install/lib/python2.7/dist-packages/hesai_lidar
+-- Installing: /home/d402/pandar20B/install/lib/python2.7/dist-packages/hesai_lidar/__init__.pyc
+-- Installing: /home/d402/pandar20B/install/lib/python2.7/dist-packages/hesai_lidar/__init__.py
+-- Installing: /home/d402/pandar20B/install/lib/python2.7/dist-packages/hesai_lidar/msg
+-- Installing: /home/d402/pandar20B/install/lib/python2.7/dist-packages/hesai_lidar/msg/_PandarPacket.py
+-- Installing: /home/d402/pandar20B/install/lib/python2.7/dist-packages/hesai_lidar/msg/__init__.pyc
+-- Installing: /home/d402/pandar20B/install/lib/python2.7/dist-packages/hesai_lidar/msg/_PandarScan.py
+-- Installing: /home/d402/pandar20B/install/lib/python2.7/dist-packages/hesai_lidar/msg/__init__.py
+-- Installing: /home/d402/pandar20B/install/lib/python2.7/dist-packages/hesai_lidar/msg/_PandarPacket.pyc
+-- Installing: /home/d402/pandar20B/install/lib/python2.7/dist-packages/hesai_lidar/msg/_PandarScan.pyc
+-- Installing: /home/d402/pandar20B/install/lib/pkgconfig/hesai_lidar.pc
+-- Installing: /home/d402/pandar20B/install/share/hesai_lidar/cmake/hesai_lidar-msg-extras.cmake
+-- Installing: /home/d402/pandar20B/install/share/hesai_lidar/cmake/hesai_lidarConfig.cmake
+-- Installing: /home/d402/pandar20B/install/share/hesai_lidar/cmake/hesai_lidarConfig-version.cmake
+-- Installing: /home/d402/pandar20B/install/share/hesai_lidar/package.xml
+-- Installing: /home/d402/pandar20B/install/lib/hesai_lidar/hesai_lidar_node
+-- Set runtime path of "/home/d402/pandar20B/install/lib/hesai_lidar/hesai_lidar_node" to ""
+-- Installing: /home/d402/pandar20B/install/lib/libPandarGeneral.so
+-- Set runtime path of "/home/d402/pandar20B/install/lib/libPandarGeneral.so" to ""
+-- Installing: /home/d402/pandar20B/install/lib/libPandarGeneralSDK.so
+-- Set runtime path of "/home/d402/pandar20B/install/lib/libPandarGeneralSDK.so" to ""
+-- Installing: /home/d402/pandar20B/install/share/hesai_lidar/launch
+-- Installing: /home/d402/pandar20B/install/share/hesai_lidar/launch/hesai_lidar.launch
+-- Installing: /home/d402/pandar20B/install/share/hesai_lidar/config
+-- Installing: /home/d402/pandar20B/install/share/hesai_lidar/config/correction.csv

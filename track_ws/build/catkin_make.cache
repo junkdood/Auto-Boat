@@ -1,2 +1,0 @@
-print_the_track:send_gps:track
--DCATKIN_DEVEL_PREFIX=/home/d402/track_ws/devel -DCMAKE_INSTALL_PREFIX=/home/d402/track_ws/install -G Unix Makefiles

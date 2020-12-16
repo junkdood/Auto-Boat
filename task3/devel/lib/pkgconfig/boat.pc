@@ -1,8 +1,0 @@
-prefix=/home/d402/task3/devel
-
-Name: boat
-Description: Description of boat
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 

@@ -1,8 +1,0 @@
-prefix=/home/d402/pcl_new_ws_new/devel
-
-Name: pcl_test
-Description: Description of pcl_test
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 

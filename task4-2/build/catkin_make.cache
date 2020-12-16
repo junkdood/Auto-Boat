@@ -1,2 +1,0 @@
-
--DCATKIN_DEVEL_PREFIX=/home/d402/task4-2/devel -DCMAKE_INSTALL_PREFIX=/home/d402/task4-2/install -G Unix Makefiles

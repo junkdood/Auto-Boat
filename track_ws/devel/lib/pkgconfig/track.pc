@@ -1,8 +1,0 @@
-prefix=/home/d402/track_ws/devel
-
-Name: track
-Description: Description of track
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 

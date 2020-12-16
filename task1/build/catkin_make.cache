@@ -1,2 +1,0 @@
-boat
--DCATKIN_DEVEL_PREFIX=/home/d402/task1/devel -DCMAKE_INSTALL_PREFIX=/home/d402/task1/install -G Unix Makefiles
